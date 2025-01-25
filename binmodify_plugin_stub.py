@@ -12,7 +12,6 @@ import ida_kernwin
 
 import logging
 
-
 logger = logging.getLogger("binmodify")
 logger.setLevel(logging.INFO)
 if not logger.hasHandlers():

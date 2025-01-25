@@ -174,9 +174,18 @@ class Result(IntEnum):
     ArchModeMismatch = 63
     NoFreeSpace = 64
     InvalidOptionalHeaderMagic = 65
-    OverlappingFileRanges = 66
-    NoLastCaveChange = 67
-    NoNextWriteRecord = 68
+    IntersectingFileRanges = 66
+    IntersectingMemoryRanges = 67
+    IllogicalInsnToMove = 68
+    IllogicalJmpSize = 69
+    UnexpectedEof = 70
+    VirtualSizeLessThenFileSize = 71
+    InvalidElfRanges = 72
+    CantExpandPhdr = 73
+    FileszBiggerThenMemsz = 74
+    StartAfterEnd = 75
+    NoLastCaveChange = 76
+    NoNextWriteRecord = 77
 
 
 class ZigStream:
