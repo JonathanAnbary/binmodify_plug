@@ -14,12 +14,12 @@ import ida_kernwin
 import logging
 
 logger = logging.getLogger("binmodify")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 if not logger.hasHandlers():
     logger.addHandler(logging.StreamHandler())
 
 def pure_patch(ea: int, patch: bytes) -> None:
-    logger.info(f"patching {binascii.hexlify(patch)} at {ea:X}")
+    logger.debug(f"patching {binascii.hexlify(patch)} at {ea:X}")
     match ida_ida.inf_get_filetype():
         case ida_ida.f_COFF | ida_ida.f_PE:
             filetype = binmodify.FileType.Coff
@@ -34,19 +34,27 @@ def pure_patch(ea: int, patch: bytes) -> None:
         new = hp.get_new_addr()
         is_end = hp.get_is_end()
         if is_end:
+            # plus one since this can only return a possible address while in case of an end cave we need one past the last possible address.
+            new += 1
+            logger.debug(f"adjusting segm end from {old:X} to {new:X}")
+            # negative one because ida wants an ea that is inside of the segment.
             ida_segment.set_segm_end(old, new, 0)
         else:
+            logger.debug(f"adjusting segm start from {old:X} to {new:X}")
             ida_segment.set_segm_start(old, new, 0)
         temp = hs.get_next_write_record()
         while temp is not None:
             pos, bts = temp
             addr = hp.off_to_addr(pos)
+            logger.debug(f"writing bytes {binascii.hexlify(bts)} at addr {addr:X}")
             ida_bytes.put_bytes(addr, bts)
             temp = hs.get_next_write_record()
         func = ida_funcs.get_func(ea)
         if is_end:
+            logger.debug(f"appending func tail {old:X} - {new:X}")
             ida_funcs.append_func_tail(func, old, new)
         else:
+            logger.debug(f"appending func tail {new:X} - {old:X}")
             ida_funcs.append_func_tail(func, new, old)
 
 # def create_cave(size: int) -> None:
