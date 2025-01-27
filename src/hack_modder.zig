@@ -18,7 +18,7 @@ pub fn Modder(T: type) type {
         cave_change: ?CaveChange,
 
         const Self = @This();
-        const Error = if (T == ElfModder) ElfModder.Error else if (T == CoffModder) CoffModder.Error else unreachable;
+        const Error = ElfModder.Error || CoffModder.Error;
         const Edge = if (T == ElfModder) ElfModder.SegEdge else if (T == CoffModder) CoffModder.SecEdge else unreachable;
 
         // temporary mechanizm until I find out how to link with the cpp sdk

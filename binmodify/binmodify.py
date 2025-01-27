@@ -1,5 +1,5 @@
 import ctypes
-from enum import IntEnum, auto
+from enum import IntEnum, auto, Enum
 
 from typing import Tuple
 
@@ -29,34 +29,61 @@ _CoffPatcher_pure_patch = _binmodify.CoffPatcher_pure_patch
 _CoffPatcher_pure_patch.argtypes = [ctypes.c_void_p, ctypes.c_uint64, ctypes.c_void_p, ctypes.c_void_p]
 _CoffPatcher_pure_patch.restype = ctypes.c_uint8
 
-_HackPatcher_init = _binmodify.HackPatcher_init
-_HackPatcher_init.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-_HackPatcher_init.restype = ctypes.c_uint8
+_ElfHackPatcher_init = _binmodify.ElfHackPatcher_init
+_ElfHackPatcher_init.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+_ElfHackPatcher_init.restype = ctypes.c_uint8
 
-_HackPatcher_deinit = _binmodify.HackPatcher_deinit
-_HackPatcher_deinit.argtypes = [ctypes.c_void_p]
-_HackPatcher_deinit.restype = None
+_ElfHackPatcher_deinit = _binmodify.ElfHackPatcher_deinit
+_ElfHackPatcher_deinit.argtypes = [ctypes.c_void_p]
+_ElfHackPatcher_deinit.restype = None
 
-_HackPatcher_pure_patch = _binmodify.HackPatcher_pure_patch
-_HackPatcher_pure_patch.argtypes = [ctypes.c_void_p, ctypes.c_uint64, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64, ctypes.c_void_p]
-_HackPatcher_pure_patch.restype = ctypes.c_uint8
+_ElfHackPatcher_pure_patch = _binmodify.ElfHackPatcher_pure_patch
+_ElfHackPatcher_pure_patch.argtypes = [ctypes.c_void_p, ctypes.c_uint64, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64, ctypes.c_void_p]
+_ElfHackPatcher_pure_patch.restype = ctypes.c_uint8
 
-_HackPatcher_get_old_addr = _binmodify.HackPatcher_get_old_addr
-_HackPatcher_get_old_addr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint64)]
-_HackPatcher_get_old_addr.restype = ctypes.c_uint8
+_ElfHackPatcher_get_old_addr = _binmodify.ElfHackPatcher_get_old_addr
+_ElfHackPatcher_get_old_addr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint64)]
+_ElfHackPatcher_get_old_addr.restype = ctypes.c_uint8
 
-_HackPatcher_get_new_addr = _binmodify.HackPatcher_get_new_addr
-_HackPatcher_get_new_addr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint64)]
-_HackPatcher_get_new_addr.restype = ctypes.c_uint8
+_ElfHackPatcher_get_new_addr = _binmodify.ElfHackPatcher_get_new_addr
+_ElfHackPatcher_get_new_addr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint64)]
+_ElfHackPatcher_get_new_addr.restype = ctypes.c_uint8
 
-_HackPatcher_get_is_end = _binmodify.HackPatcher_get_is_end
-_HackPatcher_get_is_end.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_bool)]
-_HackPatcher_get_is_end.restype = ctypes.c_uint8
+_ElfHackPatcher_get_is_end = _binmodify.ElfHackPatcher_get_is_end
+_ElfHackPatcher_get_is_end.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_bool)]
+_ElfHackPatcher_get_is_end.restype = ctypes.c_uint8
 
-_HackPatcher_off_to_addr = _binmodify.HackPatcher_off_to_addr
-_HackPatcher_off_to_addr.argtypes = [ctypes.c_void_p, ctypes.c_uint64, ctypes.c_void_p]
-_HackPatcher_off_to_addr.restype = ctypes.c_uint8
+_ElfHackPatcher_off_to_addr = _binmodify.ElfHackPatcher_off_to_addr
+_ElfHackPatcher_off_to_addr.argtypes = [ctypes.c_void_p, ctypes.c_uint64, ctypes.c_void_p]
+_ElfHackPatcher_off_to_addr.restype = ctypes.c_uint8
 
+_CoffHackPatcher_init = _binmodify.CoffHackPatcher_init
+_CoffHackPatcher_init.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+_CoffHackPatcher_init.restype = ctypes.c_uint8
+
+_CoffHackPatcher_deinit = _binmodify.CoffHackPatcher_deinit
+_CoffHackPatcher_deinit.argtypes = [ctypes.c_void_p]
+_CoffHackPatcher_deinit.restype = None
+
+_CoffHackPatcher_pure_patch = _binmodify.CoffHackPatcher_pure_patch
+_CoffHackPatcher_pure_patch.argtypes = [ctypes.c_void_p, ctypes.c_uint64, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64, ctypes.c_void_p]
+_CoffHackPatcher_pure_patch.restype = ctypes.c_uint8
+
+_CoffHackPatcher_get_old_addr = _binmodify.CoffHackPatcher_get_old_addr
+_CoffHackPatcher_get_old_addr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint64)]
+_CoffHackPatcher_get_old_addr.restype = ctypes.c_uint8
+
+_CoffHackPatcher_get_new_addr = _binmodify.CoffHackPatcher_get_new_addr
+_CoffHackPatcher_get_new_addr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint64)]
+_CoffHackPatcher_get_new_addr.restype = ctypes.c_uint8
+
+_CoffHackPatcher_get_is_end = _binmodify.CoffHackPatcher_get_is_end
+_CoffHackPatcher_get_is_end.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_bool)]
+_CoffHackPatcher_get_is_end.restype = ctypes.c_uint8
+
+_CoffHackPatcher_off_to_addr = _binmodify.CoffHackPatcher_off_to_addr
+_CoffHackPatcher_off_to_addr.argtypes = [ctypes.c_void_p, ctypes.c_uint64, ctypes.c_void_p]
+_CoffHackPatcher_off_to_addr.restype = ctypes.c_uint8
 
 _HackStream_init = _binmodify.HackStream_init
 _HackStream_init.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
@@ -82,13 +109,21 @@ _destroy_CoffPatcher = _binmodify.destroy_CoffPatcher
 _destroy_CoffPatcher.argtypes = [ctypes.c_void_p]
 _destroy_CoffPatcher.restype = None
 
-_create_HackPatcher = _binmodify.create_HackPatcher
-_create_HackPatcher.argtypes = []
-_create_HackPatcher.restype = ctypes.c_void_p
+_create_ElfHackPatcher = _binmodify.create_ElfHackPatcher
+_create_ElfHackPatcher.argtypes = []
+_create_ElfHackPatcher.restype = ctypes.c_void_p
 
-_destroy_HackPatcher = _binmodify.destroy_HackPatcher
-_destroy_HackPatcher.argtypes = [ctypes.c_void_p]
-_destroy_HackPatcher.restype = None
+_destroy_ElfHackPatcher = _binmodify.destroy_ElfHackPatcher
+_destroy_ElfHackPatcher.argtypes = [ctypes.c_void_p]
+_destroy_ElfHackPatcher.restype = None
+
+_create_CoffHackPatcher = _binmodify.create_CoffHackPatcher
+_create_CoffHackPatcher.argtypes = []
+_create_CoffHackPatcher.restype = ctypes.c_void_p
+
+_destroy_CoffHackPatcher = _binmodify.destroy_CoffHackPatcher
+_destroy_CoffHackPatcher.argtypes = [ctypes.c_void_p]
+_destroy_CoffHackPatcher.restype = None
 
 _create_HackStream = _binmodify.create_HackStream
 _create_HackStream.argtypes = []
@@ -266,48 +301,98 @@ class HackStream:
         else:
             raise Exception(f"get_last_write_pos failed {repr(res)}")
 
+
+class FileType(Enum):
+    Elf = 0
+    Coff = 1
+
 class HackPatcher:
-    def __init__(self, stream: HackStream) -> None:
-        self._this = _create_HackPatcher()
-        if self._this == 0:
-            raise Exception("create failed")
-        if Result.Ok != (res := Result(_HackPatcher_init(self._this, stream._this))):
-            _destroy_HackPatcher(self._this)
-            raise Exception(f"init failed {repr(res)}")
+    def __init__(self, stream: HackStream, filetype: FileType) -> None:
+        self.filetype = filetype
+        match filetype:
+            case FileType.Elf:
+                self._this = _create_ElfHackPatcher()
+                if self._this == 0:
+                    raise Exception("create failed")
+                if Result.Ok != (res := Result(_ElfHackPatcher_init(self._this, stream._this))):
+                    _destroy_ElfHackPatcher(self._this)
+                    raise Exception(f"init failed {repr(res)}")
+            case FileType.Coff:
+                self._this = _create_CoffHackPatcher()
+                if self._this == 0:
+                    raise Exception("create failed")
+                if Result.Ok != (res := Result(_CoffHackPatcher_init(self._this, stream._this))):
+                    _destroy_CoffHackPatcher(self._this)
+                    raise Exception(f"init failed {repr(res)}")
+
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        _HackPatcher_deinit(self._this)
-        _destroy_HackPatcher(self._this)
+        match self.filetype:
+            case FileType.Elf:
+                _ElfHackPatcher_deinit(self._this)
+                _destroy_ElfHackPatcher(self._this)
+            case FileType.Coff:
+                _CoffHackPatcher_deinit(self._this)
+                _destroy_CoffHackPatcher(self._this)
 
     def pure_patch(self, addr: int, patch: bytes, stream: HackStream) -> None:
         cpatch = (ctypes.c_ubyte * len(patch))(*patch)
-        if Result.Ok != (res := Result(_HackPatcher_pure_patch(self._this, addr, cpatch, len(patch), stream._this))):
-            raise Exception(f"pure patch failed {repr(res)}")
+        match self.filetype:
+            case FileType.Elf:
+                if Result.Ok != (res := Result(_ElfHackPatcher_pure_patch(self._this, addr, cpatch, len(patch), stream._this))):
+                    raise Exception(f"pure patch failed {repr(res)}")
+            case FileType.Coff:
+                if Result.Ok != (res := Result(_CoffHackPatcher_pure_patch(self._this, addr, cpatch, len(patch), stream._this))):
+                    raise Exception(f"pure patch failed {repr(res)}")
 
     def get_old_addr(self) -> int:
         out = ctypes.c_uint64()
-        if Result.Ok != (res := Result(_HackPatcher_get_old_addr(self._this, ctypes.byref(out)))):
-            raise Exception(f"get_old_addr failed {repr(res)}")
-        return out.value
+        match self.filetype:
+            case FileType.Elf:
+                if Result.Ok != (res := Result(_ElfHackPatcher_get_old_addr(self._this, ctypes.byref(out)))):
+                    raise Exception(f"get_old_addr failed {repr(res)}")
+                return out.value
+            case FileType.Coff:
+                if Result.Ok != (res := Result(_CoffHackPatcher_get_old_addr(self._this, ctypes.byref(out)))):
+                    raise Exception(f"get_old_addr failed {repr(res)}")
+                return out.value
     
     def get_new_addr(self) -> int:
         out = ctypes.c_uint64()
-        if Result.Ok != (res := Result(_HackPatcher_get_new_addr(self._this, ctypes.byref(out)))):
-            raise Exception(f"get_new_addr failed {repr(res)}")
-        return out.value
+        match self.filetype:
+            case FileType.Elf:
+                if Result.Ok != (res := Result(_ElfHackPatcher_get_new_addr(self._this, ctypes.byref(out)))):
+                    raise Exception(f"get_new_addr failed {repr(res)}")
+                return out.value
+            case FileType.Coff:
+                if Result.Ok != (res := Result(_CoffHackPatcher_get_new_addr(self._this, ctypes.byref(out)))):
+                    raise Exception(f"get_new_addr failed {repr(res)}")
+                return out.value
 
     def get_is_end(self) -> bool:
         out = ctypes.c_bool()
-        if Result.Ok != (res := Result(_HackPatcher_get_is_end(self._this, ctypes.byref(out)))):
-            raise Exception(f"get_new_addr failed {repr(res)}")
-        return out.value
+        match self.filetype:
+            case FileType.Elf:
+                if Result.Ok != (res := Result(_ElfHackPatcher_get_is_end(self._this, ctypes.byref(out)))):
+                    raise Exception(f"get_new_addr failed {repr(res)}")
+                return out.value
+            case FileType.Coff:
+                if Result.Ok != (res := Result(_CoffHackPatcher_get_is_end(self._this, ctypes.byref(out)))):
+                    raise Exception(f"get_new_addr failed {repr(res)}")
+                return out.value
 
     def off_to_addr(self, off: int) -> int:
         out = ctypes.c_uint64()
-        if Result.Ok != (res := Result(_HackPatcher_off_to_addr(self._this, off, ctypes.byref(out)))):
-            raise Exception(f"_HackPatcher_off_to_addr failed {repr(res)}")
-        return out.value
+        match self.filetype:
+            case FileType.Elf:
+                if Result.Ok != (res := Result(_ElfHackPatcher_off_to_addr(self._this, off, ctypes.byref(out)))):
+                    raise Exception(f"_HackPatcher_off_to_addr failed {repr(res)}")
+                return out.value
+            case FileType.Coff:
+                if Result.Ok != (res := Result(_CoffHackPatcher_off_to_addr(self._this, off, ctypes.byref(out)))):
+                    raise Exception(f"_HackPatcher_off_to_addr failed {repr(res)}")
+                return out.value
 

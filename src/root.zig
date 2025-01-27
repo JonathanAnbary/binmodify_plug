@@ -112,13 +112,29 @@ pub export fn destroy_CoffPatcher(patcher: *patch.Patcher(CoffModder)) void {
     alloc.destroy(patcher);
 }
 
-pub export fn create_HackPatcher() ?*patch.Patcher(hack_modder.Modder(ElfModder)) {
+pub export fn create_ElfHackPatcher() ?*patch.Patcher(hack_modder.Modder(ElfModder)) {
     return alloc.create(patch.Patcher(hack_modder.Modder(ElfModder))) catch return null;
 }
 
-pub export fn destroy_HackPatcher(patcher: *patch.Patcher(hack_modder.Modder(ElfModder))) void {
+pub export fn destroy_ElfHackPatcher(patcher: *patch.Patcher(hack_modder.Modder(ElfModder))) void {
     alloc.destroy(patcher);
 }
+
+pub export fn create_CoffHackPatcher() ?*patch.Patcher(hack_modder.Modder(CoffModder)) {
+    return alloc.create(patch.Patcher(hack_modder.Modder(CoffModder))) catch return null;
+}
+
+pub export fn destroy_CoffHackPatcher(patcher: *patch.Patcher(hack_modder.Modder(CoffModder))) void {
+    alloc.destroy(patcher);
+}
+
+// pub export fn create_HackModder() ?*hack_modder.Modder(ElfModder) {
+//     return alloc.create(hack_modder.Modder(ElfModder)) catch return null;
+// }
+//
+// pub export fn destroy_HackModder(modder: *hack_modder.Modder(ElfModder)) void {
+//     alloc.destroy(modder);
+// }
 
 pub export fn create_stream(path: [*]const u8, len: u64) ?*std.io.StreamSource {
     // weird stuff since Im getting a compile error otherwise.
@@ -152,26 +168,26 @@ pub export fn HackStream_deinit(out: *hack_stream.HackStream(*std.io.StreamSourc
     out.deinit();
 }
 
-fn inner_HackPatcher_init(out: *patch.Patcher(hack_modder.Modder(ElfModder)), stream: *hack_stream.HackStream(*std.io.StreamSource)) !void {
+fn inner_ElfHackPatcher_init(out: *patch.Patcher(hack_modder.Modder(ElfModder)), stream: *hack_stream.HackStream(*std.io.StreamSource)) !void {
     const parsed = try ElfParsed.init(stream.stream);
     out.* = try patch.Patcher(hack_modder.Modder(ElfModder)).init(alloc, stream, &parsed);
 }
 
-pub export fn HackPatcher_init(out: *patch.Patcher(hack_modder.Modder(ElfModder)), stream: *hack_stream.HackStream(*std.io.StreamSource)) cbinmodify.Result {
-    inner_HackPatcher_init(out, stream) catch |err| return cbinmodify.err_to_res(err);
+pub export fn ElfHackPatcher_init(out: *patch.Patcher(hack_modder.Modder(ElfModder)), stream: *hack_stream.HackStream(*std.io.StreamSource)) cbinmodify.Result {
+    inner_ElfHackPatcher_init(out, stream) catch |err| return cbinmodify.err_to_res(err);
     return .Ok;
 }
 
-pub export fn HackPatcher_deinit(patcher: *patch.Patcher(hack_modder.Modder(ElfModder))) void {
+pub export fn ElfHackPatcher_deinit(patcher: *patch.Patcher(hack_modder.Modder(ElfModder))) void {
     patcher.deinit(alloc);
 }
 
-pub export fn HackPatcher_pure_patch(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), addr: u64, patch_data: [*]const u8, patch_data_len: u64, stream: *hack_stream.HackStream(*std.io.StreamSource)) cbinmodify.Result {
+pub export fn ElfHackPatcher_pure_patch(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), addr: u64, patch_data: [*]const u8, patch_data_len: u64, stream: *hack_stream.HackStream(*std.io.StreamSource)) cbinmodify.Result {
     patcher.pure_patch(addr, patch_data[0..patch_data_len], stream) catch |err| return cbinmodify.err_to_res(err);
     return .Ok;
 }
 
-pub export fn HackPatcher_get_old_addr(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), addr: *u64) Result {
+pub export fn ElfHackPatcher_get_old_addr(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), addr: *u64) Result {
     if (patcher.modder.cave_change) |cave_change| {
         addr.* = cave_change.old_addr;
         return .Ok;
@@ -180,7 +196,7 @@ pub export fn HackPatcher_get_old_addr(patcher: *patch.Patcher(hack_modder.Modde
     }
 }
 
-pub export fn HackPatcher_get_new_addr(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), addr: *u64) Result {
+pub export fn ElfHackPatcher_get_new_addr(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), addr: *u64) Result {
     if (patcher.modder.cave_change) |cave_change| {
         addr.* = cave_change.new_addr;
         return .Ok;
@@ -189,7 +205,7 @@ pub export fn HackPatcher_get_new_addr(patcher: *patch.Patcher(hack_modder.Modde
     }
 }
 
-pub export fn HackPatcher_get_is_end(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), is_end: *bool) Result {
+pub export fn ElfHackPatcher_get_is_end(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), is_end: *bool) Result {
     if (patcher.modder.cave_change) |cave_change| {
         is_end.* = cave_change.is_end;
         return .Ok;
@@ -197,6 +213,71 @@ pub export fn HackPatcher_get_is_end(patcher: *patch.Patcher(hack_modder.Modder(
         return .NoLastCaveChange;
     }
 }
+
+fn inner_CoffHackPatcher_init(out: *patch.Patcher(hack_modder.Modder(CoffModder)), stream: *hack_stream.HackStream(*std.io.StreamSource)) !void {
+    const data = try alloc.alloc(u8, try stream.getEndPos());
+    defer alloc.free(data);
+    if (try stream.getEndPos() != try stream.read(data)) return error.UnexpectedEof;
+    const coff = try std.coff.Coff.init(data, false);
+    const parsed = CoffParsed.init(coff);
+    out.* = try patch.Patcher(hack_modder.Modder(CoffModder)).init(alloc, stream, &parsed);
+}
+
+pub export fn CoffHackPatcher_init(out: *patch.Patcher(hack_modder.Modder(CoffModder)), stream: *hack_stream.HackStream(*std.io.StreamSource)) cbinmodify.Result {
+    inner_CoffHackPatcher_init(out, stream) catch |err| return cbinmodify.err_to_res(err);
+    return .Ok;
+}
+
+pub export fn CoffHackPatcher_deinit(patcher: *patch.Patcher(hack_modder.Modder(CoffModder))) void {
+    patcher.deinit(alloc);
+}
+
+pub export fn CoffHackPatcher_pure_patch(patcher: *patch.Patcher(hack_modder.Modder(CoffModder)), addr: u64, patch_data: [*]const u8, patch_data_len: u64, stream: *hack_stream.HackStream(*std.io.StreamSource)) cbinmodify.Result {
+    patcher.pure_patch(addr, patch_data[0..patch_data_len], stream) catch |err| return cbinmodify.err_to_res(err);
+    return .Ok;
+}
+
+pub export fn CoffHackPatcher_get_old_addr(patcher: *patch.Patcher(hack_modder.Modder(CoffModder)), addr: *u64) Result {
+    if (patcher.modder.cave_change) |cave_change| {
+        addr.* = cave_change.old_addr;
+        return .Ok;
+    } else {
+        return .NoLastCaveChange;
+    }
+}
+
+pub export fn CoffHackPatcher_get_new_addr(patcher: *patch.Patcher(hack_modder.Modder(CoffModder)), addr: *u64) Result {
+    if (patcher.modder.cave_change) |cave_change| {
+        addr.* = cave_change.new_addr;
+        return .Ok;
+    } else {
+        return .NoLastCaveChange;
+    }
+}
+
+pub export fn CoffHackPatcher_get_is_end(patcher: *patch.Patcher(hack_modder.Modder(CoffModder)), is_end: *bool) Result {
+    if (patcher.modder.cave_change) |cave_change| {
+        is_end.* = cave_change.is_end;
+        return .Ok;
+    } else {
+        return .NoLastCaveChange;
+    }
+}
+
+//
+// fn inner_HackModder_init(out: *hack_modder.Modder(ElfModder), stream: *hack_stream.HackStream(*std.io.StreamSource)) !void {
+//     const parsed = try ElfParsed.init(stream.stream);
+//     out.* = hack_modder.Modder(ElfModder).init(alloc, parsed, stream);
+// }
+//
+// pub export fn HackModder_init(out: *hack_modder.Modder(ElfModder), stream: *hack_stream.HackStream(*std.io.StreamSource)) cbinmodify.Result {
+//     inner_HackPatcher_init(out, stream) catch |err| return cbinmodify.err_to_res(err);
+//     return .Ok;
+// }
+//
+// pub export fn HackModder_deinit(modder: *hack_modder.Modder(ElfModder)) void {
+//     modder.deinit(alloc);
+// }
 
 pub export fn HackStream_get_next_write_record(stream: *hack_stream.HackStream(*std.io.StreamSource), pos: *u64, bytes: *[*]const u8, bytes_len: *u64) Result {
     if (stream.write_record.items.len != 0) {
@@ -210,12 +291,21 @@ pub export fn HackStream_get_next_write_record(stream: *hack_stream.HackStream(*
     }
 }
 
-fn inner_HackPatcher_off_to_addr(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), off: u64) !u64 {
+fn inner_ElfHackPatcher_off_to_addr(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), off: u64) !u64 {
     return patcher.modder.off_to_addr(off);
 }
 
-pub export fn HackPatcher_off_to_addr(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), off: u64, addr: *u64) cbinmodify.Result {
-    addr.* = inner_HackPatcher_off_to_addr(patcher, off) catch |err| return cbinmodify.err_to_res(err);
+pub export fn ElfHackPatcher_off_to_addr(patcher: *patch.Patcher(hack_modder.Modder(ElfModder)), off: u64, addr: *u64) cbinmodify.Result {
+    addr.* = inner_ElfHackPatcher_off_to_addr(patcher, off) catch |err| return cbinmodify.err_to_res(err);
+    return .Ok;
+}
+
+fn inner_CoffHackPatcher_off_to_addr(patcher: *patch.Patcher(hack_modder.Modder(CoffModder)), off: u64) !u64 {
+    return patcher.modder.off_to_addr(off);
+}
+
+pub export fn CoffHackPatcher_off_to_addr(patcher: *patch.Patcher(hack_modder.Modder(CoffModder)), off: u64, addr: *u64) cbinmodify.Result {
+    addr.* = inner_CoffHackPatcher_off_to_addr(patcher, off) catch |err| return cbinmodify.err_to_res(err);
     return .Ok;
 }
 

@@ -3,6 +3,7 @@ from binmodify import binmodify
 import binascii
 
 import idc
+import ida_ida
 import ida_nalt
 import ida_bytes
 import ida_funcs
@@ -19,7 +20,15 @@ if not logger.hasHandlers():
 
 def pure_patch(ea: int, patch: bytes) -> None:
     logger.info(f"patching {binascii.hexlify(patch)} at {ea:X}")
-    with binmodify.ZigStream(ida_nalt.get_input_file_path().encode()) as zs, binmodify.HackStream(zs) as hs, binmodify.HackPatcher(hs) as hp:
+    match ida_ida.inf_get_filetype():
+        case ida_ida.f_COFF | ida_ida.f_PE:
+            filetype = binmodify.FileType.Coff
+        case ida_ida.f_ELF:
+            filetype = binmodify.FileType.Elf
+        case _:
+            raise Exception(f"File type not supported {ida_ida.inf_get_filetype()}")
+
+    with binmodify.ZigStream(ida_nalt.get_input_file_path().encode()) as zs, binmodify.HackStream(zs) as hs, binmodify.HackPatcher(hs, filetype) as hp:
         hp.pure_patch(ea, patch, hs)
         old = hp.get_old_addr()
         new = hp.get_new_addr()
