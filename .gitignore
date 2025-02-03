@@ -1,3 +1,4 @@
 .zig-cache
 zig-out
 __pycache__
+shell.nix

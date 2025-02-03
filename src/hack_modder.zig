@@ -109,7 +109,7 @@ test "elf Modder create cave same output" {
         defer elf_hack_modder.deinit(std.testing.allocator);
         const option = (try elf_hack_modder.get_cave_option(wanted_size, common.FileRangeFlags{ .execute = true, .read = true })) orelse return error.NoCaveOption;
         try elf_hack_modder.create_cave(wanted_size, option, &hacked_stream);
-        try std.testing.expectEqual(elf_hack_modder.cave_change, Modder(ElfModder).CaveChange{ .is_end = false, .old_addr = 0x1001af4, .new_addr = 0x1000af5 });
+        try std.testing.expectEqual(elf_hack_modder.cave_change, Modder(ElfModder).CaveChange{ .is_end = false, .old_addr = 0x1001B34, .new_addr = 0x1000B35 });
     }
 
     // check output with a cave
