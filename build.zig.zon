@@ -24,8 +24,8 @@
     // internet connectivity.
     .dependencies = .{
         .binmodify = .{
-            .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#b25c8289647ba1c93685465fb4117a7e6c7b50b2",
-            .hash = "1220d654404f4636e2302762803dbc1114c6ae9e48e6d6cd0257420793cca83c4cc2",
+            .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#9b5c76bb7583df085ed62fa55d04403627d0242b",
+            .hash = "12200ec94c9a1cc6a8070f0f68b69677ae96ee0a63084765ce83a314635235b848a2",
         },
     },
     .paths = .{
