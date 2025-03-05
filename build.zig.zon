@@ -27,6 +27,10 @@
             .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#9b5c76bb7583df085ed62fa55d04403627d0242b",
             .hash = "12200ec94c9a1cc6a8070f0f68b69677ae96ee0a63084765ce83a314635235b848a2",
         },
+        .idasdk = .{
+            .url = "../idasdk/",
+            .hash = "1220d71997f1798513de88968b9f4689e2cf2a78f0d7ddadb9ea10906769132f5ad5",
+        },
     },
     .paths = .{
         "build.zig",
