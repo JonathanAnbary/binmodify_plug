@@ -1,9 +1,10 @@
 const std = @import("std");
 const builtin = @import("builtin");
+const ida = @cImport(@cInclude("ida.h"));
 
 const hack_stream = @import("hack_stream.zig");
 
-const binmodify = @import("cbinmodify");
+const binmodify = @import("binmodify");
 
 const patch = binmodify.patch;
 const ElfModder = binmodify.ElfModder;
@@ -15,23 +16,14 @@ const common = binmodify.common;
 pub fn Modder(T: type) type {
     return struct {
         modder: T,
-        cave_change: ?CaveChange,
 
         const Self = @This();
         const Error = ElfModder.Error || CoffModder.Error;
         const Edge = if (T == ElfModder) ElfModder.SegEdge else if (T == CoffModder) CoffModder.SecEdge else unreachable;
 
-        // temporary mechanizm until I find out how to link with the cpp sdk
-        pub const CaveChange = struct {
-            is_end: bool,
-            old_addr: u64,
-            new_addr: u64,
-        };
-
         pub fn init(gpa: std.mem.Allocator, parsed: if (T == ElfModder) *const ElfParsed else if (T == CoffModder) *const CoffParsed else unreachable, stream: anytype) !Self {
             return .{
-                .modder = try T.init(gpa, parsed, stream.stream),
-                .cave_change = null,
+                .modder = try T.init(gpa, parsed, stream),
             };
         }
 
@@ -47,11 +39,11 @@ pub fn Modder(T: type) type {
             // this is the segment start if edge.is_end == false else segment end.
             const old_addr = try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1));
             try self.modder.create_cave(size, edge, stream.stream);
-            self.cave_change = .{
-                .is_end = edge.is_end,
-                .old_addr = old_addr,
-                .new_addr = try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)),
-            };
+            if (edge.is_end) {
+                _ = ida.set_segm_end(old_addr, try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)), 0);
+            } else {
+                _ = ida.set_segm_start(old_addr, try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)), 0);
+            }
         }
 
         pub fn addr_to_off(self: *const Self, addr: u64) Error!u64 {

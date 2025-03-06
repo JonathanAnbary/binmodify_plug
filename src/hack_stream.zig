@@ -1,29 +1,19 @@
 const std = @import("std");
 
-pub fn HackStream(T: type) type {
+const ida = @cImport(@cInclude("ida.h"));
+
+pub fn HackStream(T: type, Modder: type) type {
     return struct {
         stream: T,
-        // TODO: change this once you figure out the sdk, no reason this should allocate.
-        write_record: std.ArrayListUnmanaged(WriteRecord),
-        alloc: std.mem.Allocator,
+        modder: *const Modder,
 
         const Self = @This();
 
-        pub const WriteRecord = struct {
-            bytes: []const u8,
-            pos: u64,
-        };
-
-        pub fn init(stream: T, alloc: std.mem.Allocator) Self {
+        pub fn init(stream: T, modder: *const Modder) Self {
             return .{
                 .stream = stream,
-                .write_record = std.ArrayListUnmanaged(WriteRecord){},
-                .alloc = alloc,
+                .modder = modder,
             };
-        }
-
-        pub fn deinit(self: *Self) void {
-            self.write_record.deinit(self.alloc);
         }
 
         pub fn seekTo(self: *Self, pos: u64) !void {
@@ -49,10 +39,7 @@ pub fn HackStream(T: type) type {
         pub fn write(self: *Self, bytes: []const u8) !usize {
             const pos = try self.stream.getPos();
             const res = try self.stream.write(bytes);
-            try self.write_record.append(self.alloc, .{
-                .bytes = try self.alloc.dupe(u8, bytes[0..res]),
-                .pos = pos,
-            });
+            ida.put_bytes(try self.modder.off_to_addr(pos), @ptrCast(bytes[0..res]), res);
             return res;
         }
     };

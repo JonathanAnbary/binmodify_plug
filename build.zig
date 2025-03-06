@@ -1,11 +1,11 @@
 const std = @import("std");
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
 
     const optimize = b.standardOptimizeOption(.{});
 
-    cosnt idasdk = b.option([]const u8, "idasdk", "relative path to installation of the ida sdk") orelse return error.MustProvideIdaSdk;
+    const idasdk = b.option([]const u8, "idasdk", "relative path to installation of the ida sdk") orelse return error.MustProvideIdaSdk;
     const idasdkpath = b.path(idasdk);
 
     const libdir = switch (target.result.os.tag) {
@@ -17,48 +17,59 @@ pub fn build(b: *std.Build) void {
         else => return error.OsNotSupported,
     };
 
-    const lib_mod = b.createModule(.{
-        .roo
-        .target = target,
-        .optimize = optimize,
-    });
-
     const binmodify = b.dependency("binmodify", .{
         .target = target,
         .optimize = optimize,
     });
 
-    lib_mod.addImport("cbinmodify", binmodify.module("cbinmodify"));
+    const lib_mod = b.createModule(.{
+        .root_source_file = b.path("src/root.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
 
-    lib_mod.addIncludePath(b.path("include/ida/"));
+    switch (target.result.ptrBitWidth()) {
+        64 => lib_mod.addCMacro("__EA64__", "1"),
+        32 => {},
+        else => return error.PtrBitWidthNotSupported,
+    }
 
-    // Now, we will create a static library based on the module we created above.
-    // This creates a `std.Build.Step.Compile`, which is the build step responsible
-    // for actually invoking the compiler.
-    const shared_lib = b.addSharedLibrary(.{
-        .name = "ida_binmodify",
+    lib_mod.addImport("binmodify", binmodify.module("binmodify"));
+    lib_mod.addIncludePath(b.path("src"));
+
+    const lib_obj = b.addObject(.{
+        .name = "zigobj",
         .root_module = lib_mod,
     });
 
-    // This declares intent for the library to be installed into the standard
-    // location when the user invokes the "install" step (the default step when
-    // running `zig build`).
-    b.installArtifact(shared_lib);
+    const plugin = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+        .link_libcpp = true,
+    });
+
+    plugin.addCSourceFile(.{ .file = b.path("src/plugin.cpp") });
+    plugin.addObject(lib_obj);
+    plugin.addIncludePath(idasdkpath.path(b, "include"));
+    plugin.addLibraryPath(idasdkpath.path(b, "lib").path(b, libdir));
+    plugin.linkSystemLibrary("ida64", .{});
+
+    const plugin_lib = b.addSharedLibrary(.{
+        .name = "binmodify",
+        .root_module = plugin,
+    });
+
+    b.installArtifact(plugin_lib);
 
     const unit_tests_mod = b.createModule(.{
-        // `root_source_file` is the Zig "entry point" of the module. If a module
-        // only contains e.g. external object files, you can make this `null`.
-        // In this case the main source file is merely a path, however, in more
-        // complicated build scripts, this could be a generated file.
         .root_source_file = b.path("src/test.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    unit_tests_mod.addImport("cbinmodify", binmodify.module("cbinmodify"));
+    unit_tests_mod.addImport("binmodify", binmodify.module("binmodify"));
 
-    // Creates a step for unit testing. This only builds the test executable
-    // but does not run it.
     const unit_tests = b.addTest(.{
         .root_module = unit_tests_mod,
     });
