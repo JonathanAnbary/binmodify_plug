@@ -18,7 +18,9 @@ pub fn Modder(T: type) type {
         modder: T,
 
         const Self = @This();
-        const Error = ElfModder.Error || CoffModder.Error;
+        const Error = error{
+            AdjustSegmFailed,
+        } || ElfModder.Error || CoffModder.Error;
         const Edge = if (T == ElfModder) ElfModder.SegEdge else if (T == CoffModder) CoffModder.SecEdge else unreachable;
 
         pub fn init(gpa: std.mem.Allocator, parsed: if (T == ElfModder) *const ElfParsed else if (T == CoffModder) *const CoffParsed else unreachable, stream: anytype) !Self {
@@ -40,9 +42,9 @@ pub fn Modder(T: type) type {
             const old_addr = try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1));
             try self.modder.create_cave(size, edge, stream.stream);
             if (edge.is_end) {
-                _ = ida.set_segm_end(old_addr, try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)), 0);
+                if (!ida.set_segm_end(old_addr, try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)), 0)) return Error.AdjustSegmFailed;
             } else {
-                _ = ida.set_segm_start(old_addr, try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)), 0);
+                if (!ida.set_segm_start(old_addr, try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)), 0)) return Error.AdjustSegmFailed;
             }
         }
 

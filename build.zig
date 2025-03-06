@@ -49,6 +49,12 @@ pub fn build(b: *std.Build) !void {
         .link_libcpp = true,
     });
 
+    switch (target.result.ptrBitWidth()) {
+        64 => plugin.addCMacro("__EA64__", "1"),
+        32 => {},
+        else => return error.PtrBitWidthNotSupported,
+    }
+
     plugin.addCSourceFile(.{ .file = b.path("src/plugin.cpp") });
     plugin.addObject(lib_obj);
     plugin.addIncludePath(idasdkpath.path(b, "include"));

@@ -63,3 +63,7 @@ bool set_segm_start(ea_t ea, ea_t newstart, int flags);
 
 // bytes.hpp
 void put_bytes(ea_t ea, const void *buf, size_t size);
+
+typedef void func_t;
+func_t * get_func(ea_t ea);
+bool append_func_tail(func_t *pfn, ea_t ea1, ea_t ea2);

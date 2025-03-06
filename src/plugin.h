@@ -10,7 +10,7 @@ enum Filetype {
 
 extern "C" void* init_ida_patcher(char* path, uint32_t len, Filetype filetype);
 extern "C" void deinit_ida_patcher(void* ctx);
-extern "C" uint64_t pure_patch(void* ctx, uint64_t addr, const char* patch_bytes, uint64_t len);
+extern "C" uint64_t pure_patch(void* ctx, uint64_t addr, const uint8_t* patch_bytes, uint64_t len);
 
 struct plugin_ctx_t;
 
@@ -30,6 +30,7 @@ struct plugin_ctx_t : public plugmod_t
 {
   void* patch_ctx;
   plugin_ctx_t(Filetype ftype);
+  ~plugin_ctx_t();
   inline_hook_ah_t inline_hook_ah = inline_hook_ah_t(*this);
   const action_desc_t inline_hook_act;
   bool register_main_action();

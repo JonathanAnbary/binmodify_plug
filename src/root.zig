@@ -2,6 +2,8 @@ const std = @import("std");
 
 const binmodify = @import("binmodify");
 
+const ida = @cImport(@cInclude("ida.h"));
+
 const patch = binmodify.patch;
 const ElfModder = binmodify.ElfModder;
 const CoffModder = binmodify.CoffModder;
@@ -11,12 +13,17 @@ const CoffParsed = binmodify.CoffParsed;
 const hack_modder = @import("hack_modder.zig");
 const hack_stream = @import("hack_stream.zig");
 
+fn func_tail_adder(addr: u64, start: u64, size: u64) void {
+    const func = ida.get_func(addr);
+    _ = ida.append_func_tail(func, start, start + size);
+}
+
 const IdaElfModder = hack_modder.Modder(ElfModder);
-const IdaElfPatcher = patch.Patcher(IdaElfModder);
+const IdaElfPatcher = patch.AdjustablePatcher(IdaElfModder, func_tail_adder);
 const IdaElfStream = hack_stream.HackStream(*std.fs.File, IdaElfModder);
 
 const IdaCoffModder = hack_modder.Modder(CoffModder);
-const IdaCoffPatcher = patch.Patcher(IdaCoffModder);
+const IdaCoffPatcher = patch.AdjustablePatcher(IdaCoffModder, func_tail_adder);
 const IdaCoffStream = hack_stream.HackStream(*std.fs.File, IdaCoffModder);
 
 pub const Filetype = enum(u8) {
@@ -72,6 +79,7 @@ fn init_ida_patcher_inner(path: [*]const u8, len: u32, filetype: Filetype) !*any
 }
 
 pub export fn init_ida_patcher(path: [*]const u8, len: u32, filetype: Filetype) ?*anyopaque {
+    std.debug.print("{s} {} {}\n", .{ path[0..len], len, filetype });
     return init_ida_patcher_inner(path, len, filetype) catch null;
 }
 
@@ -118,6 +126,7 @@ fn pure_patch_inner(ctx: *PatcherContext, addr: u64, patch_bytes: [*]const u8, l
 }
 
 pub export fn pure_patch(ctx: *PatcherContext, addr: u64, patch_bytes: [*]const u8, len: u64) u64 {
+    std.debug.print("{X} {s}\n", .{ addr, patch_bytes[0..len] });
     pure_patch_inner(ctx, addr, patch_bytes, len) catch |err| return @intFromError(err);
     return 0;
 }

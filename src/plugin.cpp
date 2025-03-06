@@ -3,12 +3,42 @@
 #define ACTION_NAME "binmodify:InlineHook"
 #define ACTION_LABEL "Add inline hook"
 
- int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
+
+int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
     qstring patch;
     if (!ask_str(&patch, 0, "Bytes to insert")) {
       return false;
     }
-    pure_patch(ctx.patch_ctx, get_screen_ea(), patch.c_str(), patch.size());
+    if ((patch.size() % 2) != 1) {
+      warning("Patch must be formatted as lowercase hex string (must have even number of characters)");
+      return false;
+    }
+    msg("ctx.patch_ctx %p screen_ea %x patch.c_str() %s patch.size() %x\n",  ctx.patch_ctx ,get_screen_ea(), patch.c_str(), patch.size());
+    std::vector<uint8_t> patch_bytes((patch.size() - 1)/2);
+    for (uint16_t i = 0; i < patch.size() - 1; i += 2) {
+      char c0 = patch[i];
+      char c1 = patch[i+1];
+      uint8_t b = 0;
+      if (('0' <= c0) && ('9' >= c0))
+        b |= (c0 - '0') << 4;
+      else if (('a' <= c0) && ('f' >= c0))
+        b |= (c0 - 'a') << 4;
+      else{
+        warning("Patch must be formatted as lowercase hex string (character %c (%d) is not hex)", c0, i);
+        return false;
+    }
+      if (('0' <= c1) && ('9' >= c1))
+        b |= c1 - '0';
+      else if (('a' <= c1) && ('f' >= c1))
+        b |= c1 - 'a';
+      else {
+        warning("Patch must be formatted as lowercase hex string (character %c (%d) is not hex)", c1, i+1);
+        return false;
+      }
+      patch_bytes[i/2] = b;
+    }
+    pure_patch(ctx.patch_ctx, get_screen_ea(), patch_bytes.data(), patch_bytes.size());
+    return true;
   }
 
 action_state_t idaapi inline_hook_ah_t::update(action_update_ctx_t * update_ctx) {
@@ -29,8 +59,35 @@ plugin_ctx_t::plugin_ctx_t(Filetype ftype)
         "Insert an inline hook which jumps to provided code and then returns", -1))
 {
   char buf[MAX_PATH_SIZE];
-  get_input_file_path(buf, MAX_PATH_SIZE);
-  patch_ctx = init_ida_patcher(buf, MAX_PATH_SIZE, ftype);
+  patch_ctx = init_ida_patcher(buf, get_input_file_path(buf, MAX_PATH_SIZE) - 1, ftype);
+}
+
+//---------------------------------------------------------------------------
+// Callback for ui notifications
+static ssize_t idaapi ui_callback(void *ud, int notification_code, va_list va)
+{
+  switch ( notification_code )
+  {
+    // called when IDA is preparing a context menu for a view
+    // Here dynamic context-depending user menu items can be added.
+    case ui_populating_widget_popup:
+      {
+        TWidget *view = va_arg(va, TWidget *);
+        if ( get_widget_type(view) == BWN_DISASM )
+        {
+          TPopupMenu *p = va_arg(va, TPopupMenu *);
+          attach_action_to_popup(view, p, ACTION_NAME);
+        }
+      }
+      break;
+  }
+  return 0;
+}
+
+//-------------------------------------------------------------------------
+plugin_ctx_t::~plugin_ctx_t()
+{
+  unhook_from_notification_point(HT_UI, ui_callback, this);
 }
 
 bool idaapi plugin_ctx_t::run(size_t arg)
@@ -65,6 +122,8 @@ static plugmod_t *idaapi init()
     delete ctx;
     return nullptr;
   }
+  hook_to_notification_point(HT_UI, ui_callback, ctx);
+  msg("Binmodify: installed view notification hook.\n");
   return ctx;
 }
 
@@ -72,7 +131,7 @@ static plugmod_t *idaapi init()
 plugin_t PLUGIN =
 {
   IDP_INTERFACE_VERSION,
-  PLUGIN_MOD | PLUGIN_HIDE | PLUGIN_MULTI,
+  PLUGIN_MULTI,
   init,
   nullptr,
   nullptr,
