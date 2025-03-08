@@ -1,6 +1,9 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) !void {
+    // b.verbose = true;
+    b.verbose_cc = true;
+    // b.verbose_link = true;
     const target = b.standardTargetOptions(.{});
 
     const optimize = b.standardOptimizeOption(.{});
@@ -50,6 +53,11 @@ pub fn build(b: *std.Build) !void {
         plugin.c_macros.append(b.allocator, macro) catch @panic("OOM");
     }
     plugin.linkLibrary(idasdk.artifact("ida"));
+    // const cflag_to_add = try std.fmt.allocPrint(
+    //     b.allocator,
+    //     "-Wl,--version-script={s}",
+    //     .{idasdk.namedLazyPath("exports.def").getPath(b)},
+    // );
     // plugin.addObjectFile(idasdk.namedLazyPath("ida"));
     plugin.addCSourceFile(.{ .file = b.path("src/plugin.cpp") });
     plugin.addObject(lib_obj);
