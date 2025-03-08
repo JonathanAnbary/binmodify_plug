@@ -6,7 +6,7 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
 
     const idasdk_path_opt = b.option([]const u8, "idasdk", "path to installation of the ida sdk") orelse return error.MustProvideIdaSdk;
-    const idasdk_ea_64_opt = b.option(bool, "EA64", "target IDA64") orelse false;
+    const idasdk_ea_64_opt = b.option(bool, "EA64", "target IDA64 (default)") orelse true;
 
     const idasdk = b.dependency("idasdk", .{
         .target = target,
@@ -46,18 +46,16 @@ pub fn build(b: *std.Build) !void {
         .link_libcpp = true,
     });
 
-    for (idamod.include_dirs.items) |include_dir| {
-        plugin.addIncludePath(include_dir.path);
-    }
     for (idamod.c_macros.items) |macro| {
         plugin.c_macros.append(b.allocator, macro) catch @panic("OOM");
     }
-    plugin.linkLibrary(idasdk.artifact(if (idasdk_ea_64_opt) "ida64" else "ida"));
+    plugin.linkLibrary(idasdk.artifact("ida"));
+    // plugin.addObjectFile(idasdk.namedLazyPath("ida"));
     plugin.addCSourceFile(.{ .file = b.path("src/plugin.cpp") });
     plugin.addObject(lib_obj);
 
     const plugin_lib = b.addSharedLibrary(.{
-        .name = "binmodify",
+        .name = if (idasdk_ea_64_opt) "binmodify64" else "binmodify",
         .root_module = plugin,
     });
 

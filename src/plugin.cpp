@@ -3,18 +3,16 @@
 #define ACTION_NAME "binmodify:InlineHook"
 #define ACTION_LABEL "Add inline hook"
 
-
 int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
-    qstring patch;
-    if (!ask_str(&patch, 0, "Bytes to insert")) {
-      return false;
-    }
-    if ((patch.size() % 2) != 1) {
-      warning("Patch must be formatted as lowercase hex string (must have even number of characters)");
-      return false;
-    }
-    msg("ctx.patch_ctx %p screen_ea %x patch.c_str() %s patch.size() %x\n",  ctx.patch_ctx ,get_screen_ea(), patch.c_str(), patch.size());
-    std::vector<uint8_t> patch_bytes((patch.size() - 1)/2);
+  qstring patch;
+  if (!ask_str(&patch, 0, "Bytes to insert")) {
+    return false;
+  }
+  if ((patch.size() % 2) != 1) {
+    warning("Patch must be formatted as lowercase hex string (must have even number of characters)");
+    return false;
+  }
+  std::vector<uint8_t> patch_bytes((patch.size() - 1)/2);
     for (uint16_t i = 0; i < patch.size() - 1; i += 2) {
       char c0 = patch[i];
       char c1 = patch[i+1];
@@ -36,10 +34,10 @@ int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
         return false;
       }
       patch_bytes[i/2] = b;
-    }
-    pure_patch(ctx.patch_ctx, get_screen_ea(), patch_bytes.data(), patch_bytes.size());
-    return true;
-  }
+    }  
+  pure_patch(ctx.patch_ctx, get_screen_ea(), patch_bytes.data(), patch_bytes.size());
+  return true;
+}
 
 action_state_t idaapi inline_hook_ah_t::update(action_update_ctx_t * update_ctx) {
     if ((update_ctx) && (update_ctx->widget_type == BWN_DISASM))
@@ -123,7 +121,11 @@ static plugmod_t *idaapi init()
     return nullptr;
   }
   hook_to_notification_point(HT_UI, ui_callback, ctx);
-  msg("Binmodify: installed view notification hook.\n");
+  #ifdef __EA64__
+  msg("Binmodify 64bit loaded.\n");
+  #else
+  msg("Binmodify 32bit loaded.\n");
+  #endif
   return ctx;
 }
 

@@ -28,8 +28,8 @@
             .hash = "1220a57494fbba166d7c0b805e1bbb7e56ce1907d41bc21cd122975aa855b5446bd7",
         },
         .idasdk = .{
-            .url = "git+https://github.com/JonathanAnbary/idasdk.git?ref=main#69a68d9e1a50b601c24af25a1d2d5812b8ce7cb4",
-            .hash = "1220549899d237ab64adcae9a4bff8b0dd6d4cb291d081c0c2b0abca922266d6f8bb",
+            .url = "git+https://github.com/JonathanAnbary/idasdk.git?ref=main#25b8f74861bde64a3ba353bbee0cee4dd956efec",
+            .hash = "1220f1fb57dcbe5057a252410a13174c4c1599879516be28cb97ee454c49e4f96b67",
         },
     },
     .paths = .{
