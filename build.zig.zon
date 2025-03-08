@@ -29,7 +29,7 @@
         },
         .idasdk = .{
             .url = "../idasdk/",
-            .hash = "1220d71997f1798513de88968b9f4689e2cf2a78f0d7ddadb9ea10906769132f5ad5",
+            .hash = "12209c5d94ae121b81abcc8f10624ec73f778ee729321f0990ea12139e8b52f7de59",
         },
     },
     .paths = .{

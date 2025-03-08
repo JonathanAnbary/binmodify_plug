@@ -14,8 +14,8 @@ const hack_modder = @import("hack_modder.zig");
 const hack_stream = @import("hack_stream.zig");
 
 fn func_tail_adder(addr: u64, start: u64, size: u64) void {
-    const func = ida.get_func(addr);
-    _ = ida.append_func_tail(func, start, start + size);
+    const func = ida.get_func(@intCast(addr));
+    _ = ida.append_func_tail(func, @intCast(start), @intCast(start + size));
 }
 
 const IdaElfModder = hack_modder.Modder(ElfModder);

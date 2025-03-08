@@ -42,9 +42,9 @@ pub fn Modder(T: type) type {
             const old_addr = try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1));
             try self.modder.create_cave(size, edge, stream.stream);
             if (edge.is_end) {
-                if (!ida.set_segm_end(old_addr, try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)), 0)) return Error.AdjustSegmFailed;
+                if (!ida.set_segm_end(@intCast(old_addr), @intCast(try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1))), 0)) return Error.AdjustSegmFailed;
             } else {
-                if (!ida.set_segm_start(old_addr, try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1)), 0)) return Error.AdjustSegmFailed;
+                if (!ida.set_segm_start(@intCast(old_addr), @intCast(try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1))), 0)) return Error.AdjustSegmFailed;
             }
         }
 

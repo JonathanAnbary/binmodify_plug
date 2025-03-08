@@ -5,17 +5,15 @@ pub fn build(b: *std.Build) !void {
 
     const optimize = b.standardOptimizeOption(.{});
 
-    const idasdk = b.option([]const u8, "idasdk", "relative path to installation of the ida sdk") orelse return error.MustProvideIdaSdk;
-    const idasdkpath = b.path(idasdk);
+    const idasdk_path_opt = b.option([]const u8, "idasdk", "path to installation of the ida sdk") orelse return error.MustProvideIdaSdk;
+    const idasdk_ea_64_opt = b.option(bool, "EA64", "target IDA64") orelse false;
 
-    const libdir = switch (target.result.os.tag) {
-        .linux => switch (target.result.cpu.arch) {
-            .x86 => "x64_linux_gcc_32",
-            .x86_64 => "x64_linux_gcc_64",
-            else => return error.ArchNotSupported,
-        },
-        else => return error.OsNotSupported,
-    };
+    const idasdk = b.dependency("idasdk", .{
+        .target = target,
+        .optimize = optimize,
+        .idasdk = idasdk_path_opt,
+        .EA64 = idasdk_ea_64_opt,
+    });
 
     const binmodify = b.dependency("binmodify", .{
         .target = target,
@@ -28,10 +26,9 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
 
-    switch (target.result.ptrBitWidth()) {
-        64 => lib_mod.addCMacro("__EA64__", "1"),
-        32 => {},
-        else => return error.PtrBitWidthNotSupported,
+    const idamod = idasdk.module("ida");
+    for (idamod.c_macros.items) |macro| {
+        lib_mod.c_macros.append(b.allocator, macro) catch @panic("OOM");
     }
 
     lib_mod.addImport("binmodify", binmodify.module("binmodify"));
@@ -49,17 +46,15 @@ pub fn build(b: *std.Build) !void {
         .link_libcpp = true,
     });
 
-    switch (target.result.ptrBitWidth()) {
-        64 => plugin.addCMacro("__EA64__", "1"),
-        32 => {},
-        else => return error.PtrBitWidthNotSupported,
+    for (idamod.include_dirs.items) |include_dir| {
+        plugin.addIncludePath(include_dir.path);
     }
-
+    for (idamod.c_macros.items) |macro| {
+        plugin.c_macros.append(b.allocator, macro) catch @panic("OOM");
+    }
+    plugin.linkLibrary(idasdk.artifact(if (idasdk_ea_64_opt) "ida64" else "ida"));
     plugin.addCSourceFile(.{ .file = b.path("src/plugin.cpp") });
     plugin.addObject(lib_obj);
-    plugin.addIncludePath(idasdkpath.path(b, "include"));
-    plugin.addLibraryPath(idasdkpath.path(b, "lib").path(b, libdir));
-    plugin.linkSystemLibrary("ida64", .{});
 
     const plugin_lib = b.addSharedLibrary(.{
         .name = "binmodify",

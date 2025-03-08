@@ -39,7 +39,7 @@ pub fn HackStream(T: type, Modder: type) type {
         pub fn write(self: *Self, bytes: []const u8) !usize {
             const pos = try self.stream.getPos();
             const res = try self.stream.write(bytes);
-            ida.put_bytes(try self.modder.off_to_addr(pos), @ptrCast(bytes[0..res]), res);
+            ida.put_bytes(@intCast(try self.modder.off_to_addr(pos)), @ptrCast(bytes[0..res]), res);
             return res;
         }
     };
