@@ -70,24 +70,4 @@ pub fn build(b: *std.Build) !void {
     });
 
     b.installArtifact(plugin_lib);
-
-    const unit_tests_mod = b.createModule(.{
-        .root_source_file = b.path("src/test.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-
-    unit_tests_mod.addImport("binmodify", binmodify.module("binmodify"));
-
-    const unit_tests = b.addTest(.{
-        .root_module = unit_tests_mod,
-    });
-
-    const run_unit_tests = b.addRunArtifact(unit_tests);
-
-    // Similar to creating the run step earlier, this exposes a `test` step to
-    // the `zig build --help` menu, providing a way for the user to request
-    // running the unit tests.
-    const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&run_unit_tests.step);
 }

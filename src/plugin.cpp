@@ -1,4 +1,5 @@
 #include "plugin.h"
+#include <cstddef>
 
 #define ACTION_NAME "binmodify:InlineHook"
 #define ACTION_LABEL "Add inline hook"
@@ -13,7 +14,7 @@ int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
     return false;
   }
   std::vector<uint8_t> patch_bytes((patch.size() - 1)/2);
-    for (uint16_t i = 0; i < patch.size() - 1; i += 2) {
+  for (uint16_t i = 0; i < patch.size() - 1; i += 2) {
       char c0 = patch[i];
       char c1 = patch[i+1];
       uint8_t b = 0;
@@ -21,7 +22,7 @@ int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
         b |= (c0 - '0') << 4;
       else if (('a' <= c0) && ('f' >= c0))
         b |= (c0 - 'a') << 4;
-      else{
+      else {
         warning("Patch must be formatted as lowercase hex string (character %c (%d) is not hex)", c0, i);
         return false;
     }
@@ -34,7 +35,7 @@ int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
         return false;
       }
       patch_bytes[i/2] = b;
-    }  
+  }
   pure_patch(ctx.patch_ctx, get_screen_ea(), patch_bytes.data(), patch_bytes.size());
   return true;
 }
@@ -47,17 +48,15 @@ action_state_t idaapi inline_hook_ah_t::update(action_update_ctx_t * update_ctx)
 
 #define MAX_PATH_SIZE 100
 
-plugin_ctx_t::plugin_ctx_t(Filetype ftype)
+plugin_ctx_t::plugin_ctx_t(Filetype ftype, void*_patch_ctx)
   : inline_hook_act(ACTION_DESC_LITERAL_PLUGMOD(
         ACTION_NAME,
         ACTION_LABEL,
         &inline_hook_ah,
         this,
         "Shift+I",
-        "Insert an inline hook which jumps to provided code and then returns", -1))
+        "Insert an inline hook which jumps to provided code and then returns", -1)), patch_ctx(_patch_ctx)
 {
-  char buf[MAX_PATH_SIZE];
-  patch_ctx = init_ida_patcher(buf, get_input_file_path(buf, MAX_PATH_SIZE) - 1, ftype);
 }
 
 //---------------------------------------------------------------------------
@@ -85,6 +84,7 @@ static ssize_t idaapi ui_callback(void *ud, int notification_code, va_list va)
 //-------------------------------------------------------------------------
 plugin_ctx_t::~plugin_ctx_t()
 {
+  deinit_ida_patcher(patch_ctx);
   unhook_from_notification_point(HT_UI, ui_callback, this);
 }
 
@@ -113,7 +113,14 @@ static plugmod_t *idaapi init()
     default:
       return nullptr;
   }
-  plugin_ctx_t *ctx = new plugin_ctx_t(ftype);
+  char buf[MAX_PATH_SIZE];
+  void* patch_ctx = init_ida_patcher(buf, get_input_file_path(buf, MAX_PATH_SIZE) - 1, ftype);
+  if (patch_ctx == NULL) 
+  {
+    msg("Failed to init ida_patcher\n");
+    return nullptr;
+  }
+  plugin_ctx_t *ctx = new plugin_ctx_t(ftype, patch_ctx);
   if ( !ctx->register_main_action() )
   {
     msg("Failed to register menu item for <" ACTION_LABEL "> plugin!\n");

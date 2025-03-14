@@ -29,7 +29,7 @@ struct inline_hook_ah_t : public action_handler_t
 struct plugin_ctx_t : public plugmod_t
 {
   void* patch_ctx;
-  plugin_ctx_t(Filetype ftype);
+  plugin_ctx_t(Filetype ftype, void* _patch_ctx);
   ~plugin_ctx_t();
   inline_hook_ah_t inline_hook_ah = inline_hook_ah_t(*this);
   const action_desc_t inline_hook_act;
