@@ -67,3 +67,14 @@ void put_bytes(ea_t ea, const void *buf, size_t size);
 typedef void func_t;
 func_t * get_func(ea_t ea);
 bool append_func_tail(func_t *pfn, ea_t ea1, ea_t ea2);
+
+typedef void insn_t;
+
+#ifdef __EA64__
+#define SIZEOF_INSN_T 360
+#else
+#define SIZEOF_INSN_T 216
+#endif
+
+
+int decode_insn(insn_t *out, ea_t ea);

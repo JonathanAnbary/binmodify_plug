@@ -23,23 +23,25 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
 
-    const lib_mod = b.createModule(.{
+    const objmod = b.createModule(.{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
+        .pic = true,
+        .stack_check = false,
     });
 
     const idamod = idasdk.module("ida");
     for (idamod.c_macros.items) |macro| {
-        lib_mod.c_macros.append(b.allocator, macro) catch @panic("OOM");
+        objmod.c_macros.append(b.allocator, macro) catch @panic("OOM");
     }
 
-    lib_mod.addImport("binmodify", binmodify.module("binmodify"));
-    lib_mod.addIncludePath(b.path("src"));
+    objmod.addImport("binmodify", binmodify.module("binmodify"));
+    objmod.addIncludePath(b.path("src"));
 
     const lib_obj = b.addObject(.{
         .name = "zigobj",
-        .root_module = lib_mod,
+        .root_module = objmod,
     });
 
     const plugin = b.createModule(.{

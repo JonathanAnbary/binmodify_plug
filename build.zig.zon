@@ -1,15 +1,8 @@
 .{
-    // This is the default name used by packages depending on this one. For
-    // example, when a user runs `zig fetch --save <url>`, this field is used
-    // as the key in the `dependencies` table. Although the user can choose a
-    // different name, most users will stick with this provided value.
-    //
-    // It is redundant to include "zig" in this name because it is already
-    // within the Zig package namespace.
-    .name = "ida_binmodify",
+    .fingerprint = 0x548f192e7ae016bd,
 
-    // This is a [Semantic Version](https://semver.org/).
-    // In a future version of Zig it will be used for package deduplication.
+    .name = .ida_binmodify,
+
     .version = "0.0.0",
 
     // This field is optional.
@@ -17,15 +10,10 @@
     // with this value.
     //.minimum_zig_version = "0.11.0",
 
-    // This field is optional.
-    // Each dependency must either provide a `url` and `hash`, or a `path`.
-    // `zig build --fetch` can be used to fetch all dependencies of a package, recursively.
-    // Once all dependencies are fetched, `zig build` no longer requires
-    // internet connectivity.
     .dependencies = .{
         .binmodify = .{
-            .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#2e407197b3da09123f046c9220b0266743421384",
-            .hash = "1220a57494fbba166d7c0b805e1bbb7e56ce1907d41bc21cd122975aa855b5446bd7",
+            .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#9bc971cfbded00984009b3905329810e77ba5d33",
+            .hash = "binmodify-0.0.0-npBjn3HyAQCtTPSj_ZBY1FOqAWgiEpM3Aj8SwHTDU72K",
         },
         .idasdk = .{
             .url = "git+https://github.com/JonathanAnbary/idasdk.git?ref=main#93960f87a974074163926b7b7eaed15abc5c02a6",
