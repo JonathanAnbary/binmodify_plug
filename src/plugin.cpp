@@ -15,26 +15,26 @@ int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
   }
   std::vector<uint8_t> patch_bytes((patch.size() - 1)/2);
   for (uint16_t i = 0; i < patch.size() - 1; i += 2) {
-      char c0 = patch[i];
-      char c1 = patch[i+1];
-      uint8_t b = 0;
-      if (('0' <= c0) && ('9' >= c0))
-        b |= (c0 - '0') << 4;
-      else if (('a' <= c0) && ('f' >= c0))
-        b |= (c0 - 'a') << 4;
-      else {
-        warning("Patch must be formatted as lowercase hex string (character %c (%d) is not hex)", c0, i);
-        return false;
+    char c0 = patch[i];
+    char c1 = patch[i+1];
+    uint8_t b = 0;
+    if (('0' <= c0) && ('9' >= c0))
+      b |= (c0 - '0') << 4;
+    else if (('a' <= c0) && ('f' >= c0))
+      b |= (c0 - 'a' + 0xa) << 4;
+    else {
+      warning("Patch must be formatted as lowercase hex string (character %c (%d) is not hex)", c0, i);
+      return false;
     }
-      if (('0' <= c1) && ('9' >= c1))
-        b |= c1 - '0';
-      else if (('a' <= c1) && ('f' >= c1))
-        b |= c1 - 'a';
-      else {
-        warning("Patch must be formatted as lowercase hex string (character %c (%d) is not hex)", c1, i+1);
-        return false;
-      }
-      patch_bytes[i/2] = b;
+    if (('0' <= c1) && ('9' >= c1))
+      b |= c1 - '0';
+    else if (('a' <= c1) && ('f' >= c1))
+      b |= c1 - 'a' + 0xa;
+    else {
+      warning("Patch must be formatted as lowercase hex string (character %c (%d) is not hex)", c1, i+1);
+      return false;
+    }
+    patch_bytes[i/2] = b;
   }
   pure_patch(ctx.patch_ctx, get_screen_ea(), patch_bytes.data(), patch_bytes.size());
   return true;

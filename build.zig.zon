@@ -12,8 +12,8 @@
 
     .dependencies = .{
         .binmodify = .{
-            .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#93985ebf65937bc3ddb8cd00c9967d753c49b354",
-            .hash = "binmodify-0.0.0-npBjn_TxAQCMvBNdhpf6wmRDOVZEaceBryUlwZcV8bDL",
+            .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#e2d984e5a07abff0f4c15e635d668b2a06f0b5ed",
+            .hash = "binmodify-0.0.0-npBjn1X0AQAvkIMOmtN_6JJyUPO9j3Q34lNPYbRsh9Dm",
         },
         .idasdk = .{
             .url = "git+https://github.com/JonathanAnbary/idasdk.git?ref=main#93960f87a974074163926b7b7eaed15abc5c02a6",
