@@ -112,7 +112,6 @@ pub export fn deinit_ida_patcher(ctx: *PatcherContext) void {
 fn pure_patch_inner(ctx: *PatcherContext, addr: u64, patch_bytes: [*]const u8, len: u64) !void {
     switch (ctx.filetype) {
         .Elf => {
-            std.debug.print("is elf", .{});
             const patcher: *IdaElfPatcher = @ptrCast(ctx.patcher);
             const stream: *IdaElfStream = @ptrCast(ctx.ida_stream);
             const patch_info = try patcher.pure_patch(addr, patch_bytes[0..len], stream);
@@ -128,7 +127,6 @@ fn pure_patch_inner(ctx: *PatcherContext, addr: u64, patch_bytes: [*]const u8, l
 }
 
 pub export fn pure_patch(ctx: *PatcherContext, addr: u64, patch_bytes: [*]const u8, len: u64) u64 {
-    std.debug.print("pure patch {X} {X}\n", .{ addr, patch_bytes[0..len] });
     pure_patch_inner(ctx, addr, patch_bytes, len) catch |err| return @intFromError(err);
     return 0;
 }
