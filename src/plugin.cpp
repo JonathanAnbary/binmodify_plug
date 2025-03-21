@@ -114,24 +114,25 @@ static plugmod_t *idaapi init()
       return nullptr;
   }
   char buf[MAX_PATH_SIZE];
-  void* patch_ctx = init_ida_patcher(buf, get_input_file_path(buf, MAX_PATH_SIZE) - 1, ftype);
-  if (patch_ctx == NULL) 
+  void *patcher_ctx = NULL; 
+  uint64_t err = init_ida_patcher(&patcher_ctx, buf, get_input_file_path(buf, MAX_PATH_SIZE) - 1, ftype);
+  if (err != 0)
   {
-    msg("Failed to init ida_patcher\n");
+    msg("[Binmodify] Failed to init ida_patcher, err %d\n", err);
     return nullptr;
   }
-  plugin_ctx_t *ctx = new plugin_ctx_t(ftype, patch_ctx);
+  plugin_ctx_t *ctx = new plugin_ctx_t(ftype, patcher_ctx);
   if ( !ctx->register_main_action() )
   {
-    msg("Failed to register menu item for <" ACTION_LABEL "> plugin!\n");
+    msg("[Binmodify] Failed to register menu item for <" ACTION_LABEL "> plugin!\n");
     delete ctx;
     return nullptr;
   }
   hook_to_notification_point(HT_UI, ui_callback, ctx);
   #ifdef __EA64__
-  msg("Binmodify 64bit loaded.\n");
+  msg("[Binmodify] 64bit loaded.\n");
   #else
-  msg("Binmodify 32bit loaded.\n");
+  msg("[Binmodify] 32bit loaded.\n");
   #endif
   return ctx;
 }

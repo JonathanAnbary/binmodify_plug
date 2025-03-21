@@ -7,8 +7,7 @@ enum Filetype {
   Elf = 0,
   Coff = 1,
 };
-
-extern "C" void* init_ida_patcher(char* path, uint32_t len, Filetype filetype);
+extern "C" uint64_t init_ida_patcher(void** patcher, char* path, uint32_t len, Filetype filetype);
 extern "C" void deinit_ida_patcher(void* ctx);
 extern "C" uint64_t pure_patch(void* ctx, uint64_t addr, const uint8_t* patch_bytes, uint64_t len);
 

@@ -63,6 +63,7 @@ fn init_ida_patcher_inner(path: [*]const u8, len: u32, filetype: Filetype) !*any
         .Coff => {
             const data = try alloc.alloc(u8, try file.getEndPos());
             defer alloc.free(data);
+            _ = try file.readAll(data);
             const coff = try std.coff.Coff.init(data, false);
             const parsed = CoffParsed.init(coff);
             const patcher = try alloc.create(IdaCoffPatcher);
@@ -78,8 +79,9 @@ fn init_ida_patcher_inner(path: [*]const u8, len: u32, filetype: Filetype) !*any
     return patcher_context;
 }
 
-pub export fn init_ida_patcher(path: [*]const u8, len: u32, filetype: Filetype) ?*anyopaque {
-    return init_ida_patcher_inner(path, len, filetype) catch null;
+pub export fn init_ida_patcher(patcher: *?*anyopaque, path: [*]const u8, len: u32, filetype: Filetype) u64 {
+    patcher.* = init_ida_patcher_inner(path, len, filetype) catch |err| return @intFromError(err);
+    return 0;
 }
 
 pub export fn deinit_ida_patcher(ctx: *PatcherContext) void {
