@@ -5,7 +5,6 @@ Bin(ary) Mod(ify) is a lightweight tool for patching binary executables, this is
 
 Features:
 
-- Creating code caves (not yet exposed).
 - Inserting inline hooks (Shift+I).
 
 Together these features allow for writing to binary files as though they were textual files! Inserting extra code inbetween existing instructions.
@@ -13,27 +12,17 @@ Together these features allow for writing to binary files as though they were te
 Installation
 ============
 
-run `zig build -Doptimize=ReleaseSafe`.
+run `zig build -Doptimize=ReleaseSafe -Didasdk=<ida-sdk-path>`.
 
-copy (or link) `zig-out/lib/libida_binmodify.a` into the `binmodify` directory.
+copy (or link) `zig-out/lib/libbinmodify.so` into the ida plugins directory (`~/.idapro/plugins/` on linux).
 
-copy (or link) the entire binmodify direcory into the ida plugins directory (`~/.idapro/plugins/` on linux).
+Usage
+=====
 
-copy (or link) the `binmodify_plugin_stub.py` file into the ida plugins directory.
+* Locate the place where you want to insert your hook.
 
-Testing
-=======
+![](resources/screenshots/before.png "Before")
 
-There are no tests for the idapython scripts.
+* Click `Shift+I`, you will be prompted for which bytes you would like to insert.
 
-In order to test the zig lib run `zig build test`.
-
-Planned features
-================
-
-Take a look at the planned features of binmodify.
-
-In addtion the idapython plugin porition still needs to expose:
-
-- PE patching.
-- Cave creation.
+![](resources/screenshots/after.png "After")
