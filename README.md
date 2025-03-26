@@ -7,7 +7,7 @@ Features:
 
 - Inserting inline hooks (Shift+I).
 
-Together these features allow for writing to binary files as though they were textual files! Inserting extra code inbetween existing instructions.
+This allowes for writing to binary files as though they were textual files! Inserting extra code inbetween existing instructions.
 
 Installation
 ============

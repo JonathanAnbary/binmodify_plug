@@ -5,11 +5,6 @@
 
     .version = "0.0.0",
 
-    // This field is optional.
-    // This is currently advisory only; Zig does not yet do anything
-    // with this value.
-    //.minimum_zig_version = "0.11.0",
-
     .dependencies = .{
         .binmodify = .{
             .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#2b9cd7cd6f75aeb41d38ee9c3a73e99f16eee6c7",
@@ -24,8 +19,6 @@
         "build.zig",
         "build.zig.zon",
         "src",
-        // For example...
-        //"LICENSE",
-        //"README.md",
+        "LICENSE",
     },
 }
