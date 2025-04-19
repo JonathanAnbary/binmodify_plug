@@ -34,7 +34,7 @@ pub fn Modder(T: type) type {
             return self.modder.get_cave_option(wanted_size, flags);
         }
 
-        pub fn create_cave(self: *Self, size: u64, edge: Edge, stream: anytype) !void {
+        pub fn create_cave(self: *Self, size: u32, edge: Edge, stream: anytype) !void {
             // this is the segment start if edge.is_end == false else segment end.
             const old_addr = try self.modder.off_to_addr(self.modder.cave_to_off(edge, 1));
             try self.modder.create_cave(size, edge, stream.stream);

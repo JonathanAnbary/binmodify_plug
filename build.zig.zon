@@ -7,8 +7,8 @@
 
     .dependencies = .{
         .binmodify = .{
-            .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#2b9cd7cd6f75aeb41d38ee9c3a73e99f16eee6c7",
-            .hash = "binmodify-0.0.0-npBjnxP9AQBm98p12-vO6pQk7YCxS_nmxdBVdlyZ5TaV",
+            .url = "git+https://github.com/JonathanAnbary/binmodify.git?ref=main#01b3f2a070ee375b3c699499de4b88f31c408cc2",
+            .hash = "binmodify-0.0.0-npBjn38pAgCHiR9SHuzGI5dqz1kQMHTVFotoo36cY2BV",
         },
         .idasdk = .{
             .url = "git+https://github.com/JonathanAnbary/idasdk.git?ref=main#93960f87a974074163926b7b7eaed15abc5c02a6",
