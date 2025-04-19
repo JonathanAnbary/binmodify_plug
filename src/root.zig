@@ -122,6 +122,8 @@ const Status = enum(u64) {
     InvalidMachine,
     MissingCoffSection,
     MissingStringTable,
+    PatchTooLarge,
+    AdjustSegmFailed,
 };
 
 const AllError = error{
@@ -204,6 +206,8 @@ const AllError = error{
     InvalidMachine,
     MissingCoffSection,
     MissingStringTable,
+    PatchTooLarge,
+    AdjustSegmFailed,
 };
 
 fn err_to_enum(err: AllError) Status {
@@ -287,6 +291,8 @@ fn err_to_enum(err: AllError) Status {
         AllError.InvalidMachine => .InvalidMachine,
         AllError.MissingCoffSection => .MissingCoffSection,
         AllError.MissingStringTable => .MissingStringTable,
+        AllError.PatchTooLarge => .PatchTooLarge,
+        AllError.AdjustSegmFailed => .AdjustSegmFailed,
     };
 }
 
@@ -377,7 +383,7 @@ fn pure_patch_inner(ctx: *PatcherContext, addr: u64, patch_bytes: [*]const u8, l
     }
 }
 
-pub export fn pure_patch(ctx: *PatcherContext, addr: u64, patch_bytes: [*]const u8, len: u64) u64 {
-    pure_patch_inner(ctx, addr, patch_bytes, len) catch |err| return @intFromError(err);
-    return 0;
+pub export fn pure_patch(ctx: *PatcherContext, addr: u64, patch_bytes: [*]const u8, len: u64) Status {
+    pure_patch_inner(ctx, addr, patch_bytes, len) catch |err| return err_to_enum(err);
+    return .Ok;
 }

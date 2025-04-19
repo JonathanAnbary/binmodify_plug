@@ -4,6 +4,172 @@
 #define ACTION_NAME "binmodify:InlineHook"
 #define ACTION_LABEL "Add inline hook"
 
+
+const char* status_to_string(Status s) {
+  switch (s) {
+    case Ok:
+      return "Ok";
+    case OutOfMemory:
+      return "OutOfMemory";
+    case SharingViolation:
+      return "SharingViolation";
+    case PathAlreadyExists:
+      return "PathAlreadyExists";
+    case FileNotFound:
+      return "FileNotFound";
+    case AccessDenied:
+      return "AccessDenied";
+    case PipeBusy:
+      return "PipeBusy";
+    case NoDevice:
+      return "NoDevice";
+    case NameTooLong:
+      return "NameTooLong";
+    case InvalidUtf8:
+      return "InvalidUtf8";
+    case InvalidWtf8:
+      return "InvalidWtf8";
+    case BadPathName:
+      return "BadPathName";
+    case Unexpected:
+      return "Unexpected";
+    case NetworkNotFound:
+      return "NetworkNotFound";
+    case AntivirusInterference:
+      return "AntivirusInterference";
+    case SymLinkLoop:
+      return "SymLinkLoop";
+    case ProcessFdQuotaExceeded:
+      return "ProcessFdQuotaExceeded";
+    case SystemFdQuotaExceeded:
+      return "SystemFdQuotaExceeded";
+    case SystemResources:
+      return "SystemResources";
+    case FileTooBig:
+      return "FileTooBig";
+    case IsDir:
+      return "IsDir";
+    case NoSpaceLeft:
+      return "NoSpaceLeft";
+    case NotDir:
+      return "NotDir";
+    case DeviceBusy:
+      return "DeviceBusy";
+    case FileLocksNotSupported:
+      return "FileLocksNotSupported";
+    case FileBusy:
+      return "FileBusy";
+    case WouldBlock:
+      return "WouldBlock";
+    case Unseekable:
+      return "Unseekable";
+    case InputOutput:
+      return "InputOutput";
+    case OperationAborted:
+      return "OperationAborted";
+    case BrokenPipe:
+      return "BrokenPipe";
+    case ConnectionResetByPeer:
+      return "ConnectionResetByPeer";
+    case ConnectionTimedOut:
+      return "ConnectionTimedOut";
+    case NotOpenForReading:
+      return "NotOpenForReading";
+    case SocketNotConnected:
+      return "SocketNotConnected";
+    case Canceled:
+      return "Canceled";
+    case ProcessNotFound:
+      return "ProcessNotFound";
+    case LockViolation:
+      return "LockViolation";
+    case EndOfStream:
+      return "EndOfStream";
+    case InvalidElfMagic:
+      return "InvalidElfMagic";
+    case InvalidElfVersion:
+      return "InvalidElfVersion";
+    case InvalidElfClass:
+      return "InvalidElfClass";
+    case InvalidElfEndian:
+      return "InvalidElfEndian";
+    case EdgeNotFound:
+      return "EdgeNotFound";
+    case InvalidEdge:
+      return "InvalidEdge";
+    case InvalidHeader:
+      return "InvalidHeader";
+    case OffsetNotLoaded:
+      return "OffsetNotLoaded";
+    case AddrNotMapped:
+      return "AddrNotMapped";
+    case NoMatchingOffset:
+      return "NoMatchingOffset";
+    case IntersectingFileRanges:
+      return "IntersectingFileRanges";
+    case InvalidElfRanges:
+      return "InvalidElfRanges";
+    case OverlappingMemoryRanges:
+      return "OverlappingMemoryRanges";
+    case UnexpectedEof:
+      return "UnexpectedEof";
+    case CantExpandPhdr:
+      return "CantExpandPhdr";
+    case FileszBiggerThenMemsz:
+      return "FileszBiggerThenMemsz";
+    case OutOfBoundField:
+      return "OutOfBoundField";
+    case UnmappedRange:
+      return "UnmappedRange";
+    case FieldNotAdjustable:
+      return "FieldNotAdjustable";
+    case PhdrTablePhdrNotFound:
+      return "PhdrTablePhdrNotFound";
+    case NoSpaceToExtendPhdrTable:
+      return "NoSpaceToExtendPhdrTable";
+    case TooManyFileRanges:
+      return "TooManyFileRanges";
+    case ArchNotEndianable:
+      return "ArchNotEndianable";
+    case ArchModeMismatch:
+      return "ArchModeMismatch";
+    case NoFreeSpace:
+      return "NoFreeSpace";
+    case ArchNotSupported:
+      return "ArchNotSupported";
+    case ModeNotSupported:
+      return "ModeNotSupported";
+    case ArchEndianMismatch:
+      return "ArchEndianMismatch";
+    case MissingPEHeader:
+      return "MissingPEHeader";
+    case NoCaveOption:
+      return "NoCaveOption";
+    case InvalidOptionalHeaderMagic:
+      return "InvalidOptionalHeaderMagic";
+    case VirtualSizeLessThenFileSize:
+      return "VirtualSizeLessThenFileSize";
+    case StartAfterEnd:
+      return "StartAfterEnd";
+    case DiskQuota:
+      return "DiskQuota";
+    case InvalidArgument:
+      return "InvalidArgument";
+    case NotOpenForWriting:
+      return "NotOpenForWriting";
+    case InvalidPEMagic:
+      return "InvalidPEMagic";
+    case InvalidPEHeader:
+      return "InvalidPEHeader";
+    case InvalidMachine:
+      return "InvalidMachine";
+    case MissingCoffSection:
+      return "MissingCoffSection";
+    case MissingStringTable:
+      return "MissingStringTable";
+  }
+}
+
 int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
   qstring patch;
   if (!ask_str(&patch, 0, "Bytes to insert")) {
@@ -36,7 +202,11 @@ int idaapi inline_hook_ah_t::activate(action_activation_ctx_t *) {
     }
     patch_bytes[i/2] = b;
   }
-  pure_patch(ctx.patch_ctx, get_screen_ea(), patch_bytes.data(), patch_bytes.size());
+  Status s = pure_patch(ctx.patch_ctx, get_screen_ea(), patch_bytes.data(), patch_bytes.size());
+  if (s != Ok) {
+    warning("Pure patch failed, err %s", status_to_string(s));
+    return false;
+  }
   return true;
 }
 
@@ -115,10 +285,10 @@ static plugmod_t *idaapi init()
   }
   char buf[MAX_PATH_SIZE];
   void *patcher_ctx = NULL; 
-  uint64_t err = init_ida_patcher(&patcher_ctx, buf, get_input_file_path(buf, MAX_PATH_SIZE) - 1, ftype);
-  if (err != 0)
+  Status s = init_ida_patcher(&patcher_ctx, buf, get_input_file_path(buf, MAX_PATH_SIZE) - 1, ftype);
+  if (s != Ok) 
   {
-    msg("[Binmodify] Failed to init ida_patcher, err %d\n", err);
+    msg("[Binmodify] Failed to init ida_patcher, err %s\n", status_to_string(s));
     return nullptr;
   }
   plugin_ctx_t *ctx = new plugin_ctx_t(ftype, patcher_ctx);
