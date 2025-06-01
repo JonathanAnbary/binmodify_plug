@@ -167,6 +167,16 @@ const char* status_to_string(Status s) {
       return "MissingCoffSection";
     case MissingStringTable:
       return "MissingStringTable";
+    case PatchTooLarge:
+      return "PatchTooLarge";
+    case AdjustSegmFailed:
+      return "AdjustSegmFailed";
+    case RequestedFileAlignmentDisagreeWithHeader:
+      return "RequestedFileAlignmentDisagreeWithHeader";
+    case AddSegmFailed:
+      return "AddSegmFailed";
+    default:
+      return "Unknown Error";
   }
 }
 

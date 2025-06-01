@@ -89,6 +89,10 @@ enum Status {
     InvalidMachine,
     MissingCoffSection,
     MissingStringTable,
+    PatchTooLarge,
+    AdjustSegmFailed,
+    RequestedFileAlignmentDisagreeWithHeader,
+    AddSegmFailed,
 };
 
 extern "C" Status init_ida_patcher(void** patcher, char* path, uint32_t len, Filetype filetype);
