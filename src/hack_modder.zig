@@ -58,9 +58,9 @@ pub fn Modder(T: type) type {
             return self.modder.cave_to_off(cave, size);
         }
 
-        pub fn create_filerange(self: *Self, gpa: std.mem.Allocator, size: u32, file_align: u32, flags: FileRangeFlags, file: anytype) !u64 {
-            const off = try self.modder.create_filerange(gpa, size, file_align, flags, file);
-            const start = try self.off_to_addr(off);
+        pub fn create_filerange(self: *Self, gpa: std.mem.Allocator, size: u32, file_align: u32, flags: FileRangeFlags, hack_file: anytype) !u64 {
+            const off = try self.modder.create_filerange(gpa, size, file_align, flags, hack_file.file);
+            const start = try self.modder.off_to_addr(off);
             const sclass = if (flags.execute) "CODE" else if (flags.write) "DATA" else "CONST";
             if (!ida.add_segm(
                 0, // not sure what this value should be.

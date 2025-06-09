@@ -93,6 +93,7 @@ enum Status {
     AdjustSegmFailed,
     RequestedFileAlignmentDisagreeWithHeader,
     AddSegmFailed,
+  TruncatedSection,
 };
 
 extern "C" Status init_ida_patcher(void** patcher, char* path, uint32_t len, Filetype filetype);

@@ -124,6 +124,7 @@ const Status = enum(u64) {
     AdjustSegmFailed,
     RequestedFileAlignmentDisagreeWithHeader,
     AddSegmFailed,
+    TruncatedSection,
 };
 
 const AllError = error{
@@ -210,6 +211,7 @@ const AllError = error{
     AdjustSegmFailed,
     RequestedFileAlignmentDisagreeWithHeader,
     AddSegmFailed,
+    TruncatedSection,
 };
 
 fn err_to_enum(err: AllError) Status {
@@ -297,6 +299,7 @@ fn err_to_enum(err: AllError) Status {
         AllError.AdjustSegmFailed => .AdjustSegmFailed,
         AllError.RequestedFileAlignmentDisagreeWithHeader => .RequestedFileAlignmentDisagreeWithHeader,
         AllError.AddSegmFailed => .AddSegmFailed,
+        AllError.TruncatedSection => .TruncatedSection,
     };
 }
 

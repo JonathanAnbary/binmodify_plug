@@ -175,6 +175,8 @@ const char* status_to_string(Status s) {
       return "RequestedFileAlignmentDisagreeWithHeader";
     case AddSegmFailed:
       return "AddSegmFailed";
+    case TruncatedSection:
+      return "TruncatedSection";
     default:
       return "Unknown Error";
   }
